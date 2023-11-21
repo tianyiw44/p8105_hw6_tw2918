@@ -218,5 +218,21 @@ boot_result|>
 * The density plot for r_squared if approximatly symmetric around the peak, but there appears to be a slight skew to the right, indicating that there are a number of R_Squared values higher than the mode.The tails of the distribution taper off, with fewer observations having very low or very high R_Squared values.
 * The density plot for log(beta0*beta1) shows symmetry around the peak, with a bell-shaped curve that is typical of a normal distribution.The peak of the Log_Beta density curve is around 2.10, which is the mode of this distribution.
 
+Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for the two estimate.
+
+```{r}
+boot_result |>
+  pivot_longer(
+    r_squared:log_beta,
+    names_to = "estimate",
+    values_to = "value"
+  )|>
+  group_by(estimate)|>
+  summarize(
+    ci_lower = quantile(value, 0.025),
+    ci_upper = quantile(value, 0.075)
+  )|>
+  knitr::kable(digits = 3)
+```
 
 
