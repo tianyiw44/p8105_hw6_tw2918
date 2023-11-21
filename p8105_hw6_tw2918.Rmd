@@ -153,7 +153,7 @@ weather_df =
 
 ** Linear Regression and bootstrap**
 
-Fit linear regression simple linear regression with tmax as the response with tmin and prcp as the predictors. Use 5000 bootstrap samples and, for each bootstrap sample, produce estimates of `r_squared` and `log(β0∗β1)`
+Fit simple linear regression with tmax as the response with tmin and prcp as the predictors. Use 5000 bootstrap samples and, for each bootstrap sample, produce estimates of `r_squared` and `log(β0∗β1)`
 
 ```{r}
 # set function draw a size from the dataframe of the exact size of the dataframe
@@ -185,8 +185,38 @@ boot_result =
     log_beta= log(intercept*tmin)
   )|>
   select(strap_number, r_squared, log_beta)
+
+print(boot_result)
 ```
 
+
+Plot the distribution of your estimates, and describe these in words. 
+
+```{r}
+#R squared plot
+boot_result|>
+  ggplot(aes(x=r_squared)) +
+  geom_density()+
+  labs(title = "Density Plot of R_Squared", 
+       x = "R_Squared", 
+       y = "Density" 
+       )
+
+# log_beta plot
+boot_result|>
+  ggplot(aes(x=log_beta)) +
+  geom_density()+
+  labs(title = "Density Plot of Log_Beta", 
+       x = "Log_Beta", 
+       y = "Density" 
+       )
+
+```
+
+*Comment on the Plot*
+
+* The density plot for r_squared if approximatly symmetric around the peak, but there appears to be a slight skew to the right, indicating that there are a number of R_Squared values higher than the mode.The tails of the distribution taper off, with fewer observations having very low or very high R_Squared values.
+* The density plot for log(beta0*beta1) shows symmetry around the peak, with a bell-shaped curve that is typical of a normal distribution.The peak of the Log_Beta density curve is around 2.10, which is the mode of this distribution.
 
 
 
