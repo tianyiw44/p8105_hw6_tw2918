@@ -271,4 +271,42 @@ bwt_df = read_csv("./data/birthweight.csv", show_col_types = FALSE) |>
 colSums(is.na(bwt_df))
 ```
 
+**Regression Model for Birthweight**
+
+Propose a regression model for birthweight. This model may be based on a hypothesized structure for the factors that underlie birthweight, on a data-driven model-building process, or a combination of the two. Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot.
+
+
+```{r}
+btw_lm = 
+  bwt_df |>
+  lm(bwt ~ babysex + blength + gaweeks + momage + ppwt + smoken + wtgain, data = _ )
+
+btw_lm|>
+  broom::tidy()|>
+  knitr::kable()
+
+btw_lm|>
+  broom::glance() |>
+  knitr::kable()
+
+```
+
+*Model Building Process*
+
+* **Proposed Model:Birthweight = babysex + blength + gaweeks + momage + ppwt + smoken + wtgain**
+* I proposed model based on hypothesis that baby's sex, length, gestational age in weeks, mother’s age at delivery (years), mother’s weight at delivery (pounds), average number of cigarettes smoked per day during pregnancy, and mother’s weight gain during pregnancy (pounds) will impacted baby's birthweight. And from the coefficient and p.value produced we can tell that all of the predictors are significantly associated with birthweight because the p.value for each estimate coefficient is less than 0.05. R-squared produced tells us that these predictors combined explained 59.96% of the variability of birthweight. 
+
+Show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot.
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
 
