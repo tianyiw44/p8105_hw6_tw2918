@@ -48,11 +48,29 @@ homicide_df = read_csv("./data/homicide_data.csv", show_col_types = FALSE) |>
     across(c(uid, victim_last, victim_first, victim_race, victim_age, victim_sex, city, state, disposition), ~na_if(., "Unknown")),
     victim_age = as.numeric(victim_age),
     city_state = paste(city, state, sep = ", "),
-    case_solved = ifelse(grepl("Closed", disposition, ignore.case = TRUE), "Yes", "No")
+    case_resolved = ifelse(grepl("Closed", disposition, ignore.case = TRUE), "1", "0")
     )|>
   filter(
     !city_state %in% c("Tulsa, AL", "Dallas, TX", "Phoenix, AZ", "Kansas City, MO" ),
     victim_race == "White" | victim_race == "Black"
     )
+
+print(homicide_df)
 ```
+
+**logistic regression on city of Balitmore, MD**
+
+For the city of `Baltimore, MD`, use the `glm` function to fit a logistic regression with `resolved` vs `unresolved` as the outcome and victim age, sex and race as predictors. Save the output of `glm` as an `R object`; 
+
+```{r}
+fit_logistic = homicide_df |>
+  filter(city_state == "Baltimore, MD")|>
+  mutate(case_resolved = as.numeric(case_resolved))|>
+  glm(case_resolved ~ victim_age + victim_sex + victim_race,data = _, family = binomial())
+
+print(fit_logistic)
+```
+
+apply the `broom::tidy` to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
+
 
