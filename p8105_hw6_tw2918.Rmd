@@ -73,4 +73,16 @@ print(fit_logistic)
 
 apply the `broom::tidy` to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
 
+```{r}
+fit_logistic|>
+  broom::tidy()|>
+  filter(term == "victim_sexMale")|>
+  mutate(OR = exp(estimate),
+         ci_lower = exp(estimate - (1.96 * std.error)),
+         ci_upper = exp(estimate + (1.96 * std.error))
+      )|>
+  select(term, OR, ci_lower, ci_upper)|>
+  knitr::kable()
+```
+
 
