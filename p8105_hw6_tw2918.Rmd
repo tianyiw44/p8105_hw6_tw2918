@@ -35,7 +35,7 @@ scale_fill_discrete = scale_fill_viridis_d
 * update the victim's first and last name to proper case
 * replace `unknown` to missing value `NA`
 * update `victim_age` to numeric variable
-* create new variable `city_state` and `case_sovled`
+* create new variable `city_state` and `case_resovled`, ane make `case_resovled` numeric
 * filter out four `city_state` values
 * filter and only keep observations if `victim_race` is white or black. 
 
@@ -48,7 +48,8 @@ homicide_df = read_csv("./data/homicide_data.csv", show_col_types = FALSE) |>
     across(c(uid, victim_last, victim_first, victim_race, victim_age, victim_sex, city, state, disposition), ~na_if(., "Unknown")),
     victim_age = as.numeric(victim_age),
     city_state = paste(city, state, sep = ", "),
-    case_resolved = ifelse(grepl("Closed", disposition, ignore.case = TRUE), "1", "0")
+    case_resolved = ifelse(grepl("Closed", disposition, ignore.case = TRUE), "1", "0"),
+    case_resolved = as.numeric(case_resolved)
     )|>
   filter(
     !city_state %in% c("Tulsa, AL", "Dallas, TX", "Phoenix, AZ", "Kansas City, MO" ),
@@ -65,7 +66,6 @@ For the city of `Baltimore, MD`, use the `glm` function to fit a logistic regres
 ```{r}
 fit_logistic = homicide_df |>
   filter(city_state == "Baltimore, MD")|>
-  mutate(case_resolved = as.numeric(case_resolved))|>
   glm(case_resolved ~ victim_age + victim_sex + victim_race,data = _, family = binomial())
 
 print(fit_logistic)
@@ -82,7 +82,30 @@ fit_logistic|>
          ci_upper = exp(estimate + (1.96 * std.error))
       )|>
   select(term, OR, ci_lower, ci_upper)|>
-  knitr::kable()
+  knitr::kable(digits = 3)
 ```
 
+**logistic regression on each of the city**
+
+run `glm` for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of `purrr::map`, `list columns`, and `unnest` as necessary to create a dataframe with estimated ORs and CIs for each city.
+
+```{r}
+fit_logistic_allcity = homicide_df |>
+    nest(df = -city_state)|>
+  mutate(
+    glm_model = purrr::map(df, \(df) 
+                     glm(case_resolved ~ victim_age + victim_sex + victim_race,data =df, family = binomial())),
+    glm_result = map (glm_model, broom::tidy)
+  )|>
+  select(city_state, glm_result)|>
+  unnest(glm_result)|>
+  filter(term == "victim_sexMale")|>
+  mutate(OR = exp(estimate),
+         ci_lower = exp(estimate - (1.96 * std.error)),
+         ci_upper = exp(estimate + (1.96 * std.error))
+      )|>
+  select(city_state, OR, ci_lower, ci_upper)
+
+print(fit_logistic_allcity)
+```
 
