@@ -180,15 +180,16 @@ boot_result =
     values_from = "estimate" 
   )|>
   janitor:: clean_names()|>
-  #questions, log(b0*b1) or log(b1*b2)
+  # log(b1*b2)
   mutate(
-    log_beta= log(intercept*tmin)
+    log_beta= log(tmin*prcp)
   )|>
   select(strap_number, r_squared, log_beta)
 
 print(boot_result)
 ```
 
+* There are `r sum(is.na(boot_result$log_beta))` `NA` value for the log_beta, because some of the `beta1*beta2` value appear to be less than 0. 
 
 Plot the distribution of your estimates, and describe these in words. 
 
@@ -204,6 +205,7 @@ boot_result|>
 
 # log_beta plot
 boot_result|>
+  filter(!is.na(log_beta)) |>
   ggplot(aes(x=log_beta)) +
   geom_density()+
   labs(title = "Density Plot of Log_Beta", 
@@ -215,13 +217,14 @@ boot_result|>
 
 *Comment on the Plot*
 
-* The density plot for r_squared if approximatly symmetric around the peak, but there appears to be a slight skew to the right, indicating that there are a number of R_Squared values higher than the mode.The tails of the distribution taper off, with fewer observations having very low or very high R_Squared values.
-* The density plot for log(beta0*beta1) shows symmetry around the peak, with a bell-shaped curve that is typical of a normal distribution.The peak of the Log_Beta density curve is around 2.10, which is the mode of this distribution.
+* The density plot for `r_squared` if approximately symmetric around the peak, but there appears to be a slight left skewness, indicating that there are a number of `r_squared` values lower than the mode.The tails of the distribution taper off, with fewer observations having very low or very high `r_squared` values.The peak of the density appears to occur somewhere between `-0.91` and `-0.92` on the x-axis, suggesting that this is the most common range of values for `r_squared`. 
+* The density plot for `log(beta1*beta2)` appears to be left skewed with a tail on the left, suggesting that the mean and median are typically less than the mode. The peak of the density appears to occur somewhere between `-7` and `-6` on the x-axis, suggesting that this is the most common range of values for `log_beta`. 
 
 Using the 5000 bootstrap estimates, identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval for the two estimate.
 
 ```{r}
 boot_result |>
+  filter(!is.na(log_beta)) |>
   pivot_longer(
     r_squared:log_beta,
     names_to = "estimate",
